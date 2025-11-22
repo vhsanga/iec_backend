@@ -16,12 +16,12 @@ export class AwsService {
 
     async subirArchivoToAWSs3(fileName:string, file: Buffer){
         const params: S3.PutObjectRequest = {
-            Bucket: process.env.AWS_S3_BUCKET!,
+            Bucket: 'iec-s3-bucket',
             Key: fileName,
             Body: file,
         };
         await this.s3Client.upload(params).promise();
-        return `https://${process.env.AWS_S3_BUCKET}.s3.amazonaws.com/${fileName}`;        
+        return `https://iec-s3-bucket.s3.amazonaws.com/${fileName}`;        
     }
 
 }
