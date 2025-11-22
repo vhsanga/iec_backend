@@ -15,7 +15,7 @@ import { RegistroVisita } from './entities/registro_visita.entity';
         // 🚨 Ya no se necesita 'type', el driver lo da defineConfig
 
         // 1. Credenciales de Conexión
-        host: 'localhost', 
+        host: '127.0.0.1', 
         port: 3306,
         user: 'remoto', 
         password: 'P@ss4930', // ¡CAMBIA ESTO!
