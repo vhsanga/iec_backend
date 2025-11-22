@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpException, HttpStatus, UseInterceptors, UploadedFile, ParseFilePipe } from '@nestjs/common';
 import { VisitantesService } from './visitantes.service';
 import { CreateVisitanteDto } from './dto/create-visitante.dto';
 import { RegistroVisita } from 'src/entities/registro_visita.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('visitantes')
 export class VisitantesController {
@@ -21,25 +22,17 @@ export class VisitantesController {
     }
   }
 
-  @Post()
-  create(@Body() createVisitanteDto: CreateVisitanteDto) {
-    return this.visitantesService.create(createVisitanteDto);
+  @Post('imagen/:id') // 1. 🚨 CAMBIO: Incluye el parámetro de ruta ':id'
+  @UseInterceptors(FileInterceptor('img'))
+  async setVisitaImg(
+    @UploadedFile(
+      new ParseFilePipe({ /* ... opciones de validación ... */ })
+    ) file: Express.Multer.File, 
+    @Param('id') visitanteId: string 
+    
+  ) {
+    const id = parseInt(visitanteId, 10); 
+    return this.visitantesService.guardarFoto(id, file); 
   }
 
-  @Get()
-  findAll() {
-    return this.visitantesService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.visitantesService.findOne(+id);
-  }
-
- 
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.visitantesService.remove(+id);
-  }
 }

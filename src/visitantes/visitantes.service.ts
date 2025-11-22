@@ -4,6 +4,8 @@ import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Miembro } from 'src/entities/miembro.entity';
 import { RegistroVisita } from 'src/entities/registro_visita.entity';
+import { extname } from 'path';
+import { AwsService } from 'src/aws/aws.service';
 
 
 @Injectable()
@@ -16,6 +18,7 @@ export class VisitantesService {
     private readonly registroRepository: EntityRepository<RegistroVisita>,
     @InjectRepository(Miembro)
     private readonly miembroRepository: EntityRepository<Miembro>,
+    private readonly awsService: AwsService,
   ) {}
 
   /**
@@ -60,20 +63,25 @@ export class VisitantesService {
     return nuevoRegistro;
   }
 
-  create(createVisitanteDto: CreateVisitanteDto) {
-    return 'This action adds a new visitante';
-  }
+  async guardarFoto(idusuario:number, file: Express.Multer.File){
+        if (!file) {
+            throw new Error('No se ha subido ningún archivo');
+        }
+        const allowedMimeTypes = ['image/jpeg', 'image/png'];
+        if (!allowedMimeTypes.includes(file.mimetype)) {
+            throw new Error('Formato no soportado. Solo se permiten imágenes.');
+        }
+        const visita = await this.registroRepository.findOne(idusuario);
+        if (!visita) {
+          throw new NotFoundException(`Registro de visitante con ID ${idusuario} no encontrado.`);
+        }
+        const carpetaS3 = 'visitas/';
+        const extension = extname(file.originalname); 
+        const s3Key = `${carpetaS3}${idusuario}${extension}`;
+        let urlImagen = await this.awsService.subirArchivoToAWSs3(s3Key, file.buffer);
+        visita.urlFoto = urlImagen;
+        await this.em.persistAndFlush(visita);
+        return visita;
+    }
 
-  findAll() {
-    return `This action returns all visitantes`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} visitante`;
-  }
-
-
-  remove(id: number) {
-    return `This action removes a #${id} visitante`;
-  }
 }

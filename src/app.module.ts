@@ -6,6 +6,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { defineConfig } from '@mikro-orm/mysql';
 import { Miembro } from './entities/miembro.entity';
 import { RegistroVisita } from './entities/registro_visita.entity';
+import { AwsModule } from './aws/aws.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { RegistroVisita } from './entities/registro_visita.entity';
       // Opcional: Definir las inyecciones si la configuración dependiera de otros servicios.
       // inject: [], 
     }),
+    AwsModule,
     VisitantesModule
   ],
   controllers: [AppController],
